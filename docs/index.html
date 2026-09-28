@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>국립중앙도서관 백업 도서 목록</title>
+<meta name="description" content="국립중앙도서관 디지털도서관에서 위키미디어 공용으로 백업된 도서 73,286건을 분류·시대별로 검색합니다.">
+<style>
+:root{
+  --bg:#f7f6f3;--surface:#ffffff;--text:#1f2328;--muted:#646b73;--line:#e3e1dc;
+  --accent:#2f5d8a;--accent-soft:#e8eff6;--hl:#fff1b8;--chip:#f0eee9;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181b;--surface:#1e2125;--text:#e6e6e3;--muted:#9aa0a6;--line:#30343a;
+    --accent:#7fb0e0;--accent-soft:#233344;--hl:#5a4b12;--chip:#2a2e33;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181b;--surface:#1e2125;--text:#e6e6e3;--muted:#9aa0a6;--line:#30343a;
+  --accent:#7fb0e0;--accent-soft:#233344;--hl:#5a4b12;--chip:#2a2e33;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+header{padding:28px 0 12px}
+h1{font-size:1.45rem;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:.9rem;margin:0}
+.sub a{color:var(--accent)}
+.controls{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:3px}
+select,input{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text)}
+select:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;color:var(--muted);font-size:.88rem}
+.status b{color:var(--text)}
+.pager{display:flex;gap:6px;align-items:center}
+.pager button{font:inherit;font-size:.85rem;padding:5px 11px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text);cursor:pointer}
+.pager button:disabled{opacity:.4;cursor:default}
+table{width:100%;border-collapse:collapse;table-layout:fixed;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{font-size:.78rem;font-weight:600;color:var(--muted);background:var(--chip);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+col.c-title{width:28%}col.c-author{width:13%}col.c-date{width:11%}col.c-sum{width:36%}col.c-meta{width:0}col.c-link{width:78px}
+table.showmeta col.c-title{width:25%}table.showmeta col.c-sum{width:29%}table.showmeta col.c-meta{width:13%}
+.ko{font-weight:600}
+.orig{color:var(--muted);font-size:.85rem;margin-top:2px}
+.date .y{font-variant-numeric:tabular-nums}
+.date .raw{color:var(--muted);font-size:.8rem}
+.est{display:inline-block;font-size:.7rem;padding:0 5px;border-radius:4px;background:var(--chip);color:var(--muted);margin-left:4px}
+.meta{font-size:.8rem;color:var(--muted)}
+.links a{display:block;font-size:.8rem;color:var(--accent);text-decoration:none;white-space:nowrap}
+.links a:hover{text-decoration:underline}
+mark{background:var(--hl);color:inherit;border-radius:2px}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.overview{margin:14px 0 4px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.overview summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:.92rem}
+.grid-scroll{overflow-x:auto;padding:0 10px 12px}
+.grid{border-collapse:collapse;font-size:.8rem;min-width:900px;width:100%;table-layout:auto;border:0}
+.grid th,.grid td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:right;position:static;background:none}
+.grid th:first-child,.grid td:first-child{text-align:left;white-space:nowrap}
+.grid td.n{cursor:pointer;font-variant-numeric:tabular-nums}
+.grid td.n:hover{background:var(--accent-soft);color:var(--accent)}
+.grid td.z{color:var(--line)}
+footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
+.theme{float:right;font:inherit;font-size:.8rem;padding:4px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--muted);cursor:pointer}
+@media (max-width:760px){
+  .controls{grid-template-columns:1fr 1fr;position:static}
+  .controls .q{grid-column:1/-1}
+  table,thead,tbody,tr,td{display:block;border:0}
+  colgroup,thead{display:none}
+  table{background:none}
+  tr{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:10px 12px}
+  td{padding:2px 0;border:0}
+  td.author::before{content:"저자 · ";color:var(--muted);font-size:.8rem}
+  td.date{display:flex;gap:6px;align-items:baseline}
+  td.sum{margin-top:4px}
+  .links a{display:inline-block;margin-right:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <button class="theme" id="theme" type="button">테마</button>
+  <h1>국립중앙도서관 디지털도서관 백업 도서 목록</h1>
+  <p class="sub">위키미디어 공용 <a href="https://commons.wikimedia.org/wiki/Commons:Library_back_up_project/file_list/Books_in_the_Digital_Library_of_the_National_Library_of_Korea/books" target="_blank" rel="noopener">Library back up project</a>의 도서 <b id="total">73,286</b>건입니다. 한국어 제목과 한 줄 요약은 AI가 작성했습니다. <a href="https://github.com/ryucheol/nlk-digital-library-books-catalog">엑셀 파일 받기</a></p>
+</header>
+
+<details class="overview" id="overview">
+  <summary>분류 × 시대 현황 (숫자를 누르면 해당 목록이 열립니다)</summary>
+  <div class="grid-scroll"><table class="grid" id="grid"></table></div>
+</details>
+
+<div class="controls">
+  <div><label for="cat">분류</label><select id="cat"></select></div>
+  <div><label for="era">시대</label><select id="era"></select></div>
+  <div class="q"><label for="q">검색 (제목·원제목·저자·요약·ID)</label><input id="q" type="search" placeholder="예: 논어, 정약용, 경성, 1925" autocomplete="off"></div>
+</div>
+
+<div class="status">
+  <div id="info">분류나 시대를 고르거나 검색어를 입력하세요.</div>
+  <div class="pager"><button id="prev" type="button">이전</button><span id="page"></span><button id="next" type="button">다음</button></div>
+</div>
+
+<div id="results"></div>
+
+<div class="status"><div></div><div class="pager"><button id="prev2" type="button">이전</button><button id="next2" type="button">다음</button></div></div>
+
+<footer>
+  시대는 발행연도(서기·조선 왕 재위년·일본/대한제국/중국 연호)를 서기로 바꿔 나눴습니다. 연도가 없는 책은 제목과 저자로 추정했고 <span class="est">추정</span>으로 표시했습니다.<br>
+  한국어 제목·분류·요약은 원문 PDF를 읽지 않고 제목·저자·발행 정보로 AI(Claude)가 작성했습니다. 잘 알려지지 않은 책은 요약이 일반적이거나 틀릴 수 있습니다.<br>
+  간찰·교지·영수증 같은 낱장 고문서는 '고문서·기록물(간찰 등)'에 묶었고 번역·요약을 하지 않았습니다. 제목이 같은 여러 권은 같은 번역과 요약을 씁니다.<br>
+  서지 원자료: 국립중앙도서관, 위키미디어 공용.
+</footer>
+</div>
+
+<script>
+(function(){
+  var PAGE=50, meta=null, cache={}, rows=[], filtered=[], page=0, reqId=0;
+  var $=function(id){return document.getElementById(id)};
+  var catSel=$('cat'), eraSel=$('era'), qIn=$('q');
+
+  // theme toggle (per-viewer convenience only)
+  var root=document.documentElement;
+  try{var t=localStorage.getItem('theme'); if(t) root.setAttribute('data-theme',t);}catch(e){}
+  $('theme').onclick=function(){
+    var dark=root.getAttribute('data-theme')?root.getAttribute('data-theme')==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    var n=dark?'light':'dark'; root.setAttribute('data-theme',n);
+    try{localStorage.setItem('theme',n);}catch(e){}
+  };
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function fmt(n){return n.toLocaleString('ko-KR')}
+  function cnt(c,e){return meta.counts[c+'_'+e]||0}
+  function catTotal(c){var s=0;for(var e=0;e<meta.eras.length;e++)s+=cnt(c,e);return s}
+  function eraTotal(e){var s=0;for(var c=0;c<meta.cats.length;c++)s+=cnt(c,e);return s}
+
+  function buildUI(){
+    $('total').textContent=fmt(meta.total);
+    var o='<option value="">전체 분류</option>';
+    meta.cats.forEach(function(c,i){o+='<option value="'+i+'">'+esc(c)+' ('+fmt(catTotal(i))+')</option>'});
+    catSel.innerHTML=o;
+    fillEra();
+    var g='<thead><tr><th>분류 \\ 시대</th>';
+    meta.eras.forEach(function(e){g+='<th>'+esc(e.replace(/ \(.*\)/,''))+'</th>'});
+    g+='<th>합계</th></tr></thead><tbody>';
+    meta.cats.forEach(function(c,ci){
+      g+='<tr><td>'+esc(c)+'</td>';
+      meta.eras.forEach(function(e,ei){var n=cnt(ci,ei); g+= n?'<td class="n" data-c="'+ci+'" data-e="'+ei+'">'+fmt(n)+'</td>':'<td class="z">·</td>'});
+      g+='<td class="n" data-c="'+ci+'" data-e="">'+fmt(catTotal(ci))+'</td></tr>';
+    });
+    g+='<tr><td><b>합계</b></td>';
+    meta.eras.forEach(function(e,ei){g+='<td class="n" data-c="" data-e="'+ei+'"><b>'+fmt(eraTotal(ei))+'</b></td>'});
+    g+='<td><b>'+fmt(meta.total)+'</b></td></tr></tbody>';
+    $('grid').innerHTML=g;
+    $('grid').onclick=function(ev){
+      var td=ev.target.closest('td.n'); if(!td) return;
+      catSel.value=td.dataset.c; fillEra(); eraSel.value=td.dataset.e; qIn.value='';
+      $('overview').open=false; load();
+    };
+  }
+  function fillEra(){
+    var c=catSel.value, cur=eraSel.value;
+    var o='<option value="">전체 시대</option>';
+    meta.eras.forEach(function(e,i){
+      var n=c===''?eraTotal(i):cnt(+c,i);
+      o+='<option value="'+i+'"'+(n?'':' disabled')+'>'+esc(e)+' ('+fmt(n)+')</option>';
+    });
+    eraSel.innerHTML=o;
+    if(cur!==''&&!eraSel.querySelector('option[value="'+cur+'"]:not([disabled])')) cur='';
+    eraSel.value=cur;
+  }
+
+  function fetchPart(c,e){
+    var k=c+'_'+e;
+    if(cache[k]) return Promise.resolve(cache[k]);
+    return fetch('data/'+k+'.json').then(function(r){if(!r.ok) throw new Error(r.status); return r.json()}).then(function(d){
+      d.forEach(function(r){r.c=c;r.e=e;r.s=(r[0]+' '+r[1]+' '+r[2]+' '+r[3]+' '+r[4]+' '+r[7]).toLowerCase()});
+      cache[k]=d; return d;
+    });
+  }
+
+  function load(){
+    var c=catSel.value, e=eraSel.value, q=qIn.value.trim();
+    writeHash();
+    if(c===''&&e===''&&!q){rows=[];filtered=[];render('분류나 시대를 고르거나 검색어를 입력하세요.');return}
+    var parts=[];
+    for(var ci=0;ci<meta.cats.length;ci++){
+      if(c!==''&&ci!==+c) continue;
+      for(var ei=0;ei<meta.eras.length;ei++){
+        if(e!==''&&ei!==+e) continue;
+        if(cnt(ci,ei)) parts.push([ci,ei]);
+      }
+    }
+    var id=++reqId, done=0;
+    var need=parts.filter(function(p){return !cache[p[0]+'_'+p[1]]}).length;
+    if(need) $('info').textContent='불러오는 중… (0/'+need+' 파일)';
+    Promise.all(parts.map(function(p){
+      var had=!!cache[p[0]+'_'+p[1]];
+      return fetchPart(p[0],p[1]).then(function(d){
+        if(!had){done++; if(id===reqId) $('info').textContent='불러오는 중… ('+done+'/'+need+' 파일)';}
+        return d;
+      });
+    })).then(function(ds){
+      if(id!==reqId) return;
+      rows=[].concat.apply([],ds);
+      if(c==='') rows.sort(function(a,b){return (a[5]===''?9999:a[5])-(b[5]===''?9999:b[5])});
+      page=0; applyQuery();
+    }).catch(function(err){ if(id===reqId) render('데이터를 불러오지 못했습니다 ('+esc(err.message)+').'); });
+  }
+
+  function applyQuery(){
+    var q=qIn.value.trim().toLowerCase();
+    var terms=q?q.split(/\s+/):[];
+    filtered=terms.length?rows.filter(function(r){for(var i=0;i<terms.length;i++) if(r.s.indexOf(terms[i])<0) return false; return true}):rows;
+    render();
+  }
+
+  function hl(s){
+    s=esc(s); var q=qIn.value.trim(); if(!q) return s;
+    q.split(/\s+/).forEach(function(t){
+      if(!t) return; var re=new RegExp('('+esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+      s=s.replace(re,'<mark>$1</mark>');
+    });
+    return s;
+  }
+
+  function render(msg){
+    var showMeta=catSel.value===''||eraSel.value==='';
+    var pages=Math.max(1,Math.ceil(filtered.length/PAGE));
+    if(page>=pages) page=pages-1;
+    ['prev','prev2'].forEach(function(i){$(i).disabled=page<=0});
+    ['next','next2'].forEach(function(i){$(i).disabled=page>=pages-1});
+    $('page').textContent=filtered.length?(page+1)+' / '+fmt(pages):'';
+    if(msg){$('info').textContent=msg;$('results').innerHTML='';return}
+    $('info').innerHTML='<b>'+fmt(filtered.length)+'</b>건'+(filtered.length!==rows.length?' (전체 '+fmt(rows.length)+'건 중)':'');
+    if(!filtered.length){$('results').innerHTML='<div class="empty">검색 결과가 없습니다.</div>';return}
+    var h='<table class="'+(showMeta?'showmeta':'')+'"><colgroup><col class="c-title"><col class="c-author"><col class="c-date"><col class="c-sum">'+(showMeta?'<col class="c-meta">':'')+'<col class="c-link"></colgroup>';
+    h+='<thead><tr><th>제목 (한국어 / 원제목)</th><th>저자</th><th>발행</th><th>한 줄 요약</th>'+(showMeta?'<th>분류 · 시대</th>':'')+'<th>원문</th></tr></thead><tbody>';
+    filtered.slice(page*PAGE,(page+1)*PAGE).forEach(function(r){
+      var ko=r[1]||r[2];
+      h+='<tr><td><div class="ko">'+hl(ko)+'</div>'+(r[1]&&r[1]!==r[2]?'<div class="orig">'+hl(r[2])+'</div>':'')+'</td>';
+      h+='<td class="author">'+hl(r[3]||'—')+'</td>';
+      h+='<td class="date"><span class="y">'+(r[5]!==''?r[5]:'')+'</span>'+(r[6]?'<span class="est">추정</span>':'')+(r[4]&&String(r[4])!==String(r[5])?'<div class="raw">'+esc(r[4])+'</div>':'')+(r[5]===''&&!r[4]?'<span class="raw">미상</span>':'')+'</td>';
+      h+='<td class="sum">'+hl(r[7]||'')+'</td>';
+      if(showMeta) h+='<td class="meta">'+esc(meta.cats[r.c])+'<br>'+esc(meta.eras[r.e].replace(/ \(.*\)/,''))+'</td>';
+      h+='<td class="links"><a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(r[0])+'&ns6=1" target="_blank" rel="noopener">공용</a><a href="https://www.nl.go.kr/NL/contents/search.do?#viewKey='+encodeURIComponent(r[0])+'&viewType=C" target="_blank" rel="noopener">국중</a></td></tr>';
+    });
+    $('results').innerHTML=h+'</tbody></table>';
+  }
+
+  function go(d){page+=d;render();window.scrollTo({top:$('results').offsetTop-90})}
+  $('prev').onclick=$('prev2').onclick=function(){go(-1)};
+  $('next').onclick=$('next2').onclick=function(){go(1)};
+  catSel.onchange=function(){fillEra();load()};
+  eraSel.onchange=load;
+  var timer;
+  qIn.oninput=function(){clearTimeout(timer);timer=setTimeout(function(){
+    // a query with no category/era selected needs the data loaded first
+    if(!rows.length||(catSel.value===''&&eraSel.value==='')) load(); else {page=0;applyQuery();writeHash();}
+  },250)};
+
+  function writeHash(){
+    var p=[]; if(catSel.value!=='')p.push('c='+catSel.value); if(eraSel.value!=='')p.push('e='+eraSel.value);
+    if(qIn.value.trim())p.push('q='+encodeURIComponent(qIn.value.trim()));
+    history.replaceState(null,'',p.length?'#'+p.join('&'):location.pathname);
+  }
+  function readHash(){
+    var h={}; location.hash.replace(/^#/,'').split('&').forEach(function(kv){var i=kv.indexOf('='); if(i>0) h[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1))});
+    if(h.c!=null) catSel.value=h.c; fillEra(); if(h.e!=null) eraSel.value=h.e; if(h.q) qIn.value=h.q;
+  }
+
+  fetch('data/meta.json').then(function(r){return r.json()}).then(function(m){
+    meta=m; buildUI(); readHash();
+    if(catSel.value!==''||eraSel.value!==''||qIn.value) load(); else { $('overview').open=true; render('분류나 시대를 고르거나 검색어를 입력하세요.'); }
+  }).catch(function(){ $('info').textContent='목록 정보를 불러오지 못했습니다.'; });
+})();
+</script>
+</body>
+</html>

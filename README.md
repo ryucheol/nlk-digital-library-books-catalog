@@ -4,6 +4,12 @@ A catalog of the books that the [Wikimedia Commons Library back up project](http
 
 위키미디어 공용 백업 프로젝트가 국립중앙도서관 디지털도서관에서 옮겨 온 도서 목록(하위 페이지 `books/1`–`books/97`)을 정리한 엑셀 파일입니다.
 
+## 웹 검색 페이지
+
+https://ryucheol.github.io/nlk-digital-library-books-catalog/
+
+분류와 시대를 고르면 그 조합의 데이터 파일(최대 약 800KB)만 불러옵니다. 분류나 시대를 '전체'로 두고 검색하면 필요한 파일을 차례로 불러옵니다. 페이지 소스는 `docs/`, 데이터는 `docs/data/{분류번호}_{시대번호}.json`(182개)에 있고, `build_site.py`로 다시 만들 수 있습니다.
+
 ## 파일
 
 `NLK_books_catalog.xlsx`
