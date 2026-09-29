@@ -50,6 +50,11 @@ table.showmeta col.c-title{width:25%}table.showmeta col.c-sum{width:29%}table.sh
 .meta{font-size:.8rem;color:var(--muted)}
 .links a{display:block;font-size:.8rem;color:var(--accent);text-decoration:none;white-space:nowrap}
 .links a:hover{text-decoration:underline}
+.links a.wp{font-weight:600}
+.wps{margin-top:4px;font-size:.72rem;color:var(--muted)}
+.wpb{display:inline-block;font-size:.7rem;font-weight:600;padding:0 6px;margin-left:4px;border-radius:4px;background:var(--accent-soft);color:var(--accent);text-decoration:none;vertical-align:1px}
+.wpf{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none}
+.wpf input{width:auto;margin:0}
 mark{background:var(--hl);color:inherit;border-radius:2px}
 .empty{padding:40px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px}
 details.overview{margin:14px 0 4px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
@@ -66,11 +71,11 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
 @media (max-width:760px){
   .controls{grid-template-columns:1fr 1fr;position:static}
   .controls .q{grid-column:1/-1}
-  table,thead,tbody,tr,td{display:block;border:0}
-  colgroup,thead{display:none}
-  table{background:none}
-  tr{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:10px 12px}
-  td{padding:2px 0;border:0}
+  #results table,#results thead,#results tbody,#results tr,#results td{display:block;border:0}
+  #results colgroup,#results thead{display:none}
+  #results table{background:none}
+  #results tr{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:10px 12px}
+  #results td{padding:2px 0;border:0}
   td.author::before{content:"저자 · ";color:var(--muted);font-size:.8rem}
   td.date{display:flex;gap:6px;align-items:baseline}
   td.sum{margin-top:4px}
@@ -98,6 +103,9 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
 </div>
 
 <div class="status">
+  <label class="wpf"><input type="checkbox" id="wponly"><span>위키백과 문서가 있는 책만 보기 (<span id="wpn">0</span>건)</span></label>
+</div>
+<div class="status">
   <div id="info">분류나 시대를 고르거나 검색어를 입력하세요.</div>
   <div class="pager"><button id="prev" type="button">이전</button><span id="page"></span><button id="next" type="button">다음</button></div>
 </div>
@@ -110,6 +118,7 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
   시대는 발행연도(서기·조선 왕 재위년·일본/대한제국/중국 연호)를 서기로 바꿔 나눴습니다. 연도가 없는 책은 제목과 저자로 추정했고 <span class="est">추정</span>으로 표시했습니다.<br>
   한국어 제목·분류·요약은 원문 PDF를 읽지 않고 제목·저자·발행 정보로 AI(Claude)가 작성했습니다. 잘 알려지지 않은 책은 요약이 일반적이거나 틀릴 수 있습니다.<br>
   간찰·교지·영수증 같은 낱장 고문서는 '고문서·기록물(간찰 등)'에 묶었고 번역·요약을 하지 않았습니다. 제목이 같은 여러 권은 같은 번역과 요약을 씁니다.<br>
+  '위키백과 한·EN·中·日' 표시는 한국어·영어·중국어·일본어 위키백과에 해당 책의 문서가 있다는 뜻입니다. 한국어·중국어·일본어판은 원제목으로 문서를 찾은 뒤 문서 첫머리가 책에 관한 내용일 때만 연결했고, 나머지 언어판은 확인된 문서의 언어 간 링크로 채웠습니다. 동명의 다른 책으로 잘못 연결되었을 수 있고, 한자가 다르게 적힌 문서는 빠졌을 수 있습니다.<br>
   서지 원자료: 국립중앙도서관, 위키미디어 공용.
 </footer>
 </div>
@@ -175,7 +184,7 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
     var k=c+'_'+e;
     if(cache[k]) return Promise.resolve(cache[k]);
     return fetch('data/'+k+'.json').then(function(r){if(!r.ok) throw new Error(r.status); return r.json()}).then(function(d){
-      d.forEach(function(r){r.c=c;r.e=e;r.s=(r[0]+' '+r[1]+' '+r[2]+' '+r[3]+' '+r[4]+' '+r[7]).toLowerCase()});
+      d.forEach(function(r){r.c=c;r.e=e;r.s=(r[0]+' '+r[1]+' '+r[2]+' '+r[3]+' '+r[4]+' '+r[7]+' '+(r[9]?r[9].join(' '):'')).toLowerCase()});
       cache[k]=d; return d;
     });
   }
@@ -183,7 +192,7 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
   function load(){
     var c=catSel.value, e=eraSel.value, q=qIn.value.trim();
     writeHash();
-    if(c===''&&e===''&&!q){rows=[];filtered=[];render('분류나 시대를 고르거나 검색어를 입력하세요.');return}
+    if(c===''&&e===''&&!q&&!$('wponly').checked){rows=[];filtered=[];render('분류나 시대를 고르거나 검색어를 입력하세요.');return}
     var parts=[];
     for(var ci=0;ci<meta.cats.length;ci++){
       if(c!==''&&ci!==+c) continue;
@@ -212,7 +221,8 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
   function applyQuery(){
     var q=qIn.value.trim().toLowerCase();
     var terms=q?q.split(/\s+/):[];
-    filtered=terms.length?rows.filter(function(r){for(var i=0;i<terms.length;i++) if(r.s.indexOf(terms[i])<0) return false; return true}):rows;
+    var wp=$('wponly').checked;
+    filtered=(terms.length||wp)?rows.filter(function(r){if(wp&&!r[9]) return false; for(var i=0;i<terms.length;i++) if(r.s.indexOf(terms[i])<0) return false; return true}):rows;
     render();
   }
 
@@ -239,7 +249,9 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
     h+='<thead><tr><th>제목 (한국어 / 원제목)</th><th>저자</th><th>발행</th><th>한 줄 요약</th>'+(showMeta?'<th>분류 · 시대</th>':'')+'<th>원문</th></tr></thead><tbody>';
     filtered.slice(page*PAGE,(page+1)*PAGE).forEach(function(r){
       var ko=r[1]||r[2];
-      h+='<tr><td><div class="ko">'+hl(ko)+'</div>'+(r[1]&&r[1]!==r[2]?'<div class="orig">'+hl(r[2])+'</div>':'')+'</td>';
+      var WL=[['ko','한'],['en','EN'],['zh','中'],['ja','日']], wl='';
+      if(r[9]) WL.forEach(function(x,j){var t=r[9][j]; if(t) wl+='<a class="wpb" href="https://'+x[0]+'.wikipedia.org/wiki/'+encodeURIComponent(t.replace(/ /g,'_'))+'" target="_blank" rel="noopener" title="'+x[0]+'.wikipedia: '+esc(t)+'">'+x[1]+'</a>'});
+      h+='<tr><td><div class="ko">'+hl(ko)+'</div>'+(r[1]&&r[1]!==r[2]?'<div class="orig">'+hl(r[2])+'</div>':'')+(wl?'<div class="wps">위키백과'+wl+'</div>':'')+'</td>';
       h+='<td class="author">'+hl(r[3]||'—')+'</td>';
       h+='<td class="date"><span class="y">'+(r[5]!==''?r[5]:'')+'</span>'+(r[6]?'<span class="est">추정</span>':'')+(r[4]&&String(r[4])!==String(r[5])?'<div class="raw">'+esc(r[4])+'</div>':'')+(r[5]===''&&!r[4]?'<span class="raw">미상</span>':'')+'</td>';
       h+='<td class="sum">'+hl(r[7]||'')+'</td>';
@@ -254,6 +266,7 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
   $('next').onclick=$('next2').onclick=function(){go(1)};
   catSel.onchange=function(){fillEra();load()};
   eraSel.onchange=load;
+  $('wponly').onchange=function(){ if(!rows.length&&catSel.value===''&&eraSel.value==='') load(); else {page=0;applyQuery();writeHash();} };
   var timer;
   qIn.oninput=function(){clearTimeout(timer);timer=setTimeout(function(){
     // a query with no category/era selected needs the data loaded first
@@ -262,17 +275,20 @@ footer{color:var(--muted);font-size:.8rem;padding:28px 0 40px;line-height:1.7}
 
   function writeHash(){
     var p=[]; if(catSel.value!=='')p.push('c='+catSel.value); if(eraSel.value!=='')p.push('e='+eraSel.value);
-    if(qIn.value.trim())p.push('q='+encodeURIComponent(qIn.value.trim()));
-    history.replaceState(null,'',p.length?'#'+p.join('&'):location.pathname);
+    if(qIn.value.trim())p.push('q='+encodeURIComponent(qIn.value.trim())); if($('wponly').checked)p.push('w=1');
+    history.replaceState(null,'',p.length?'#'+p.join('&'):location.pathname); lastHash=location.hash;
   }
   function readHash(){
     var h={}; location.hash.replace(/^#/,'').split('&').forEach(function(kv){var i=kv.indexOf('='); if(i>0) h[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1))});
-    if(h.c!=null) catSel.value=h.c; fillEra(); if(h.e!=null) eraSel.value=h.e; if(h.q) qIn.value=h.q;
+    catSel.value=h.c!=null?h.c:''; fillEra(); eraSel.value=h.e!=null?h.e:''; qIn.value=h.q||''; $('wponly').checked=!!h.w;
   }
 
+  var lastHash=location.hash;
+  window.addEventListener('hashchange',function(){ if(location.hash===lastHash||!meta) return; lastHash=location.hash; readHash(); load(); });
+
   fetch('data/meta.json').then(function(r){return r.json()}).then(function(m){
-    meta=m; buildUI(); readHash();
-    if(catSel.value!==''||eraSel.value!==''||qIn.value) load(); else { $('overview').open=true; render('분류나 시대를 고르거나 검색어를 입력하세요.'); }
+    meta=m; buildUI(); $('wpn').textContent=fmt(m.wiki||0)+(m.wikiLang?' · 한 '+fmt(m.wikiLang.ko)+' / 영 '+fmt(m.wikiLang.en)+' / 중 '+fmt(m.wikiLang.zh)+' / 일 '+fmt(m.wikiLang.ja):''); readHash();
+    if(catSel.value!==''||eraSel.value!==''||qIn.value||$('wponly').checked) load(); else { $('overview').open=true; render('분류나 시대를 고르거나 검색어를 입력하세요.'); }
   }).catch(function(){ $('info').textContent='목록 정보를 불러오지 못했습니다.'; });
 })();
 </script>
